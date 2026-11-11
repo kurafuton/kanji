@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漢字問題 ランダムテスト</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #f5f7fa 0%, #e9ecf0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 680px;
+            padding: 40px 30px;
+            transition: all 0.2s ease;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            color: #1e2b3c;
+            text-align: center;
+            margin: 0 0 12px 0;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        h1 span {
+            background: #2d4b6e;
+            color: white;
+            font-size: 1.2rem;
+            border-radius: 60px;
+            padding: 4px 18px;
+            font-weight: 500;
+        }
+        .progress {
+            text-align: center;
+            color: #59748b;
+            font-weight: 500;
+            margin-bottom: 28px;
+            font-size: 1.1rem;
+            border-bottom: 2px dashed #ced8e2;
+            padding-bottom: 15px;
+        }
+        .question-area {
+            background: #f2f6fc;
+            border-radius: 28px;
+            padding: 35px 20px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.02), 0 4px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid #d9e2ec;
+            text-align: center;
+        }
+        .kana {
+            font-size: 3.8rem;
+            font-weight: 700;
+            color: #1a3d5c;
+            margin: 0;
+            line-height: 1.4;
+            letter-spacing: 2px;
+            word-break: break-word;
+        }
+        .answer-area {
+            margin: 20px 0 14px;
+            text-align: center;
+            min-height: 90px;
+        }
+        .answer-kanji {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #b1452e;
+            background: #fff1e0;
+            display: inline-block;
+            padding: 12px 40px;
+            border-radius: 60px;
+            letter-spacing: 3px;
+            box-shadow: 0 8px 0 #ccb6a4;
+            border: 1px solid #ddc7b4;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.25s, transform 0.2s;
+        }
+        .answer-kanji.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .answer-placeholder {
+            font-size: 2.2rem;
+            color: #a0b8cc;
+            font-weight: 400;
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 40px;
+            background: #e8eef5;
+            border: 1px dashed #b8cbd9;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin: 22px 0 10px;
+        }
+        button {
+            border: none;
+            background: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 16px 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            box-shadow: 0 6px 0 #b0c4d9, 0 6px 12px rgba(0, 0, 0, 0.08);
+            color: #1e3b55;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex: 0 1 auto;
+            min-width: 140px;
+            border: 1px solid #d0dfec;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b0c4d9, 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+        button:disabled {
+            opacity: 0.45;
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b0c4d9, 0 6px 12px rgba(0, 0, 0, 0.08);
+            pointer-events: none;
+        }
+        .primary {
+            background: #2d4b6e;
+            color: white;
+            box-shadow: 0 6px 0 #1a2e42, 0 6px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .primary:active {
+            box-shadow: 0 2px 0 #1a2e42, 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .success {
+            background: #2d7a5e;
+            color: white;
+            box-shadow: 0 6px 0 #1d5240, 0 6px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .danger {
+            background: #b1452e;
+            color: white;
+            box-shadow: 0 6px 0 #7d2e1e, 0 6px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .info {
+            background: #59748b;
+            color: white;
+            box-shadow: 0 6px 0 #3a5066, 0 6px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+        .restart-btn {
+            background: #e1e9f2;
+            color: #1f3b55;
+            box-shadow: 0 4px 0 #b6c8da;
+            border: 1px solid #c2d3e4;
+            font-size: 1rem;
+            padding: 14px 24px;
+            min-width: 180px;
+        }
+        .result-area {
+            margin-top: 28px;
+            background: #f9fbfe;
+            border-radius: 24px;
+            padding: 18px 22px;
+            border: 1px solid #cfddee;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .result-title {
+            font-weight: 700;
+            color: #1f3b55;
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mistake-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .mistake-item {
+            background: #ffffff;
+            padding: 12px 18px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            border-left: 8px solid #b1452e;
+            font-size: 1.1rem;
+        }
+        .mistake-kana {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .mistake-kanji {
+            font-weight: 700;
+            color: #b1452e;
+            background: #ffe6dc;
+            padding: 4px 18px;
+            border-radius: 30px;
+        }
+        .empty-mistake {
+            color: #6c8a9e;
+            font-style: italic;
+            padding: 8px 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .status-badge {
+            display: inline-block;
+            background: #d9e6f2;
+            color: #254a66;
+            padding: 6px 20px;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="app">
+    <h1>漢字テスト <span id="counterLabel">0 / 0</span></h1>
+
+    <!-- 問題表示 -->
+    <div class="question-area" id="questionArea">
+        <div class="kana" id="kanaDisplay">ー</div>
+    </div>
+
+    <!-- 答え表示 -->
+    <div class="answer-area">
+        <div id="answerPlaceholder" class="answer-placeholder">？</div>
+        <div id="answerKanji" class="answer-kanji"></div>
+    </div>
+
+    <!-- 操作ボタン -->
+    <div class="btn-group">
+        <button class="primary" id="showAnswerBtn">答えを見る</button>
+        <button class="success" id="correctBtn" disabled>✓ 正解</button>
+        <button class="danger" id="wrongBtn" disabled>✗ 不正解</button>
+    </div>
+
+    <!-- 結果表示エリア（間違い一覧） -->
+    <div class="result-area hidden" id="resultArea">
+        <div class="result-title">📌 間違えた問題</div>
+        <ul class="mistake-list" id="mistakeList"></ul>
+        <div id="noMistakeMessage" class="empty-mistake hidden">— 全問正解！お見事 —</div>
+    </div>
+
+    <!-- フッター（再スタート） -->
+    <div class="footer">
+        <div class="status-badge" id="statusMessage">スタート！</div>
+        <button class="restart-btn" id="restartBtn">⟲ 最初からやり直す</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 元データ ----------
+        const RAW_DATA = [
+            { kana: "オンコウ", kanji: "温厚" },
+            { kana: "セイレキ", kanji: "西暦" },
+            { kana: "リレキショ", kanji: "履歴書" },
+            { kana: "いもほり", kanji: "芋掘り" },
+            { kana: "ほり", kanji: "堀" },
+            { kana: "どろ", kanji: "泥" },
+            { kana: "しりごみ", kanji: "尻込み" },
+            { kana: "ばいりつ", kanji: "倍率" },
+            { kana: "リュウシ", kanji: "粒子" },
+            { kana: "セッキン", kanji: "接近" },
+            { kana: "バイヨウ", kanji: "培養" },
+            { kana: "こもった", kanji: "籠った" },
+            { kana: "ヒョウショウ", kanji: "表彰" },
+            { kana: "かた", kanji: "肩" },
+            { kana: "コショウ", kanji: "故障" },
+            { kana: "コセキ", kanji: "戸籍" },
+            { kana: "ゲンシロ", kanji: "原子炉" },
+            { kana: "ゾウカ", kanji: "造花" },
+            { kana: "カコク", kanji: "苛酷" },
+            { kana: "ビョウシャ", kanji: "描写" },
+            { kana: "ソウニュウ", kanji: "挿入" },
+            { kana: "セイギョ", kanji: "制御" },
+            { kana: "おろしうり", kanji: "卸売" },
+            { kana: "トウキ", kanji: "陶器" },
+            { kana: "トウスイ", kanji: "陶酔" },
+            { kana: "コウセイ", kanji: "更生" },
+            { kana: "ウンデイ", kanji: "雲泥" },
+            { kana: "ムゾウサ", kanji: "無造作" },
+            { kana: "つちかった", kanji: "培った" },
+            { kana: "ゲコ", kanji: "下戸" },
+            { kana: "カイキン", kanji: "解禁" }
+        ];
+
+        // ---------- 状態管理 ----------
+        let questions = [];                // 残りの問題リスト（未出題）
+        let currentQuestion = null;        // 現在表示中の問題
+        let totalQuestions = RAW_DATA.length;
+        let answeredCount = 0;            // 回答済み数
+        let mistakeList = [];             // 間違えた問題 { kana, kanji }
+        let isAnswered = false;           // 現在の問題が回答済みか
+        let answerRevealed = false;       // 答えを表示したか
+
+        // DOM要素
+        const kanaDisplay = document.getElementById('kanaDisplay');
+        const answerPlaceholder = document.getElementById('answerPlaceholder');
+        const answerKanji = document.getElementById('answerKanji');
+        const showAnswerBtn = document.getElementById('showAnswerBtn');
+        const correctBtn = document.getElementById('correctBtn');
+        const wrongBtn = document.getElementById('wrongBtn');
+        const counterLabel = document.getElementById('counterLabel');
+        const resultArea = document.getElementById('resultArea');
+        const mistakeListEl = document.getElementById('mistakeList');
+        const noMistakeMessage = document.getElementById('noMistakeMessage');
+        const statusMessage = document.getElementById('statusMessage');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // ---------- ユーティリティ ----------
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 問題セットを初期化（全問題をシャッフル）
+        function initQuestions() {
+            // 元データをディープコピーしてシャッフル
+            questions = RAW_DATA.map(q => ({ ...q }));
+            shuffleArray(questions);
+            currentQuestion = null;
+            answeredCount = 0;
+            mistakeList = [];
+            isAnswered = false;
+            answerRevealed = false;
+        }
+
+        // 次の問題をセット
+        function loadNextQuestion() {
+            if (questions.length === 0) {
+                // 全問終了
+                currentQuestion = null;
+                kanaDisplay.textContent = 'ー';
+                answerPlaceholder.classList.remove('hidden');
+                answerKanji.classList.remove('show');
+                answerKanji.textContent = '';
+                showAnswerBtn.disabled = true;
+                correctBtn.disabled = true;
+                wrongBtn.disabled = true;
+                statusMessage.textContent = '全問終了！';
+                showResults();
+                return;
+            }
+
+            // 先頭から取り出す
+            currentQuestion = questions.shift();
+            isAnswered = false;
+            answerRevealed = false;
+
+            // UI更新
+            kanaDisplay.textContent = currentQuestion.kana;
+            answerPlaceholder.classList.remove('hidden');
+            answerKanji.classList.remove('show');
+            answerKanji.textContent = '';
+
+            showAnswerBtn.disabled = false;
+            correctBtn.disabled = true;
+            wrongBtn.disabled = true;
+
+            // カウンター更新: 回答済み数 / 全体
+            updateCounter();
+
+            // 結果エリアはリセットしない（間違い一覧は常に表示更新）
+            // ただし全問終了時は表示
+            if (questions.length === 0 && currentQuestion !== null) {
+                // まだ最後の問題が残っている
+            }
+        }
+
+        // カウンター表示更新
+        function updateCounter() {
+            const done = answeredCount;
+            const total = totalQuestions;
+            counterLabel.textContent = `${done} / ${total}`;
+        }
+
+        // 答えを表示する
+        function revealAnswer() {
+            if (!currentQuestion || isAnswered) return;
+            answerRevealed = true;
+            answerPlaceholder.classList.add('hidden');
+            answerKanji.textContent = currentQuestion.kanji;
+            answerKanji.classList.add('show');
+
+            // 答え表示後は正解/不正解ボタンを有効化、答えボタンは無効化
+            showAnswerBtn.disabled = true;
+            correctBtn.disabled = false;
+            wrongBtn.disabled = false;
+        }
+
+        // 回答を記録（正解 or 不正解）
+        function recordAnswer(isCorrect) {
+            if (!currentQuestion || isAnswered) return;
+            // まだ答えを表示していなければ表示する（自動で表示）
+            if (!answerRevealed) {
+                revealAnswer();
+            }
+
+            // 記録
+            if (!isCorrect) {
+                // 間違いリストに追加（重複なし？同じ問題は一度しか出ないので重複しない）
+                mistakeList.push({ ...currentQuestion });
+            }
+
+            // 回答済みにする
+            isAnswered = true;
+            answeredCount++;
+
+            // ボタン無効化
+            correctBtn.disabled = true;
+            wrongBtn.disabled = true;
+            showAnswerBtn.disabled = true;
+
+            // カウンター更新
+            updateCounter();
+
+            // 間違い一覧を更新
+            updateMistakeDisplay();
+
+            // 次の問題があるか確認
+            if (questions.length > 0) {
+                // 少し間を置いて次の問題へ（UIがわかりやすいように即時でもよい）
+                setTimeout(() => {
+                    loadNextQuestion();
+                }, 180);
+            } else {
+                // 全問終了
+                currentQuestion = null;
+                kanaDisplay.textContent = 'ー';
+                answerPlaceholder.classList.remove('hidden');
+                answerKanji.classList.remove('show');
+                answerKanji.textContent = '';
+                showAnswerBtn.disabled = true;
+                correctBtn.disabled = true;
+                wrongBtn.disabled = true;
+                statusMessage.textContent = '全問終了！';
+                showResults();
+            }
+        }
+
+        // 間違い一覧の表示更新（常に表示エリアはあるが、最後に詳細表示）
+        function updateMistakeDisplay() {
+            // 結果エリアは全問終了時に表示するが、間違いリストは常に更新しておく
+            // 結果エリアの表示/非表示は showResults で制御
+            // ただし、途中でも「間違えた問題」を確認したいかもしれないので、
+            // 全問終了時のみ表示する仕様にする → showResultsで制御
+        }
+
+        // 全問終了時の結果表示
+        function showResults() {
+            resultArea.classList.remove('hidden');
+            // 間違いリストをレンダリング
+            mistakeListEl.innerHTML = '';
+            if (mistakeList.length === 0) {
+                noMistakeMessage.classList.remove('hidden');
+            } else {
+                noMistakeMessage.classList.add('hidden');
+                mistakeList.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'mistake-item';
+                    li.innerHTML = `<span class="mistake-kana">${item.kana}</span><span class="mistake-kanji">${item.kanji}</span>`;
+                    mistakeListEl.appendChild(li);
+                });
+            }
+            // ステータスメッセージ更新
+            statusMessage.textContent = `終了！ 正解 ${totalQuestions - mistakeList.length} / ${totalQuestions}`;
+        }
+
+        // ゲームリスタート
+        function restartGame() {
+            initQuestions();
+            // UIリセット
+            resultArea.classList.add('hidden');
+            mistakeListEl.innerHTML = '';
+            noMistakeMessage.classList.add('hidden');
+            // 最初の問題をロード
+            loadNextQuestion();
+            updateCounter();
+            statusMessage.textContent = 'スタート！';
+            showAnswerBtn.disabled = false;
+            correctBtn.disabled = true;
+            wrongBtn.disabled = true;
+            answerPlaceholder.classList.remove('hidden');
+            answerKanji.classList.remove('show');
+            answerKanji.textContent = '';
+
+            // もし問題が0件なら（ないはず）
+            if (questions.length === 0 && totalQuestions > 0) {
+                // 全問終了状態
+                kanaDisplay.textContent = 'ー';
+                showAnswerBtn.disabled = true;
+                statusMessage.textContent = '全問終了！';
+                showResults();
+            }
+        }
+
+        // ---------- イベントリスナー ----------
+        showAnswerBtn.addEventListener('click', revealAnswer);
+
+        correctBtn.addEventListener('click', () => {
+            recordAnswer(true);
+        });
+
+        wrongBtn.addEventListener('click', () => {
+            recordAnswer(false);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            restartGame();
+        });
+
+        // ---------- 初期化起動 ----------
+        function init() {
+            initQuestions();
+            // 初回問題ロード
+            if (questions.length > 0) {
+                loadNextQuestion();
+            } else {
+                // データがある場合通常は入らない
+                kanaDisplay.textContent = 'ー';
+                showAnswerBtn.disabled = true;
+                statusMessage.textContent = '問題がありません';
+            }
+            updateCounter();
+            // 初期状態では答えボタン有効、正解/不正解は無効
+            showAnswerBtn.disabled = false;
+            correctBtn.disabled = true;
+            wrongBtn.disabled = true;
+            answerPlaceholder.classList.remove('hidden');
+            answerKanji.classList.remove('show');
+            answerKanji.textContent = '';
+            resultArea.classList.add('hidden');
+            noMistakeMessage.classList.add('hidden');
+        }
+
+        init();
+
+        // 補足: 回答後に次の問題へ行く際に「間違えた問題」一覧は随時更新されないが、
+        // 最終結果表示で全てわかる。途中で確認したければリザルトを表示してもよいが、
+        // 仕様に合わせ全問終了後表示とした。
+        // 全問終了時に確実に表示するため、recordAnswer内で最後にshowResultsを呼ぶ。
+    })();
+</script>
+</body>
+</html>
